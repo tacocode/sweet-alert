@@ -1,13 +1,13 @@
 @if (Session::has('sweet_alert.alert'))
     <script>
         @if (Session::has('sweet_alert.content'))
-            var config = {!! Session::pull('sweet_alert.alert') !!}
-            var content = document.createElement('div');
+            let config = {!! Session::pull('sweet_alert.alert') !!}
+            let content = document.createElement('div');
             content.insertAdjacentHTML('afterbegin', config.content);
             config.content = content;
-            swal(config);
+            Swal.fire(config);
         @else
-            swal({!! Session::pull('sweet_alert.alert') !!});
+            Swal.fire({!! Session::pull('sweet_alert.alert') !!});
         @endif
     </script>
 @endif
