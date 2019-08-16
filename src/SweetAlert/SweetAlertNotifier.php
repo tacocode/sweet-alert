@@ -52,10 +52,8 @@ class SweetAlertNotifier
         $this->config = [
             'timer'   => config('sweet-alert.autoclose', self::TIMER_MILLISECONDS),
             'text'    => '',
-            'buttons' => [
-                'cancel'  => false,
-                'confirm' => false,
-            ],
+            'showConfirmButton' => false,
+            'showCancelButton' => false,
         ];
     }
 
@@ -169,7 +167,7 @@ class SweetAlertNotifier
      *
      * @return \UxWeb\SweetAlert\SweetAlertNotifier $this
      */
-    public function autoclose($milliseconds = null)
+    public function autoClose($milliseconds = null)
     {
         if (!is_null($milliseconds)) {
             $this->config['timer'] = $milliseconds;
@@ -187,9 +185,14 @@ class SweetAlertNotifier
      *
      * @return \UxWeb\SweetAlert\SweetAlertNotifier $this
      */
-    public function confirmButton($buttonText = 'OK', $overrides = [])
+    public function confirmButton($buttonText = 'OK')
     {
-        $this->addButton('confirm', $buttonText, $overrides);
+        $this->config['showConfirmButton'] = true;
+        $this->config['confirmButtonText'] = $buttonText;
+
+        $this->config['allowOutsideClick'] = false;
+        $this->removeTimer();
+        $this->flashConfig();
 
         return $this;
     }
@@ -198,38 +201,43 @@ class SweetAlertNotifier
      * Add a cancel button to the alert.
      *
      * @param string $buttonText
-     * @param array  $overrides
      *
      * @return \UxWeb\SweetAlert\SweetAlertNotifier $this
      */
-    public function cancelButton($buttonText = 'Cancel', $overrides = [])
+    public function cancelButton($buttonText = 'Cancel')
     {
-        $this->addButton('cancel', $buttonText, $overrides);
+        $this->config['showCancelButton'] = true;
+        $this->config['cancelButtonText'] = $buttonText;
+
+        $this->config['allowOutsideClick'] = false;
+        $this->removeTimer();
+        $this->flashConfig();
 
         return $this;
     }
 
     /**
      * Add a new custom button to the alert.
+     * @todo Probably obsolete method
      *
-     * @param string $key
      * @param string $buttonText
-     * @param array  $overrides
+     * @param string $type
      *
      * @return \UxWeb\SweetAlert\SweetAlertNotifier $this
      */
-    public function addButton($key, $buttonText, $overrides = [])
+    public function addButton($buttonText, $type = 'confirm')
     {
-        $this->config['buttons'][$key] = array_merge(
-            $this->defaultButtonConfig,
-            [
-                'text'    => $buttonText,
-                'visible' => true,
-            ],
-            $overrides
-        );
+        switch ($type) {
+            case 'cancel':
+                $this->config['showCancelButton'] = true;
+                $this->config['cancelButtonText'] = $buttonText;
+                break;
+            default:
+                $this->config['showConfirmButton'] = true;
+                $this->config['confirmButtonText'] = $buttonText;
+        }
 
-        $this->config['closeOnClickOutside'] = false;
+        $this->config['allowOutsideClick'] = false;
         $this->removeTimer();
         $this->flashConfig();
 
@@ -239,13 +247,13 @@ class SweetAlertNotifier
     /**
      * Toggle close the alert message when clicking outside.
      *
-     * @param string $buttonText
+     * @param bool $value
      *
      * @return \UxWeb\SweetAlert\SweetAlertNotifier $this
      */
-    public function closeOnClickOutside($value = true)
+    public function allowOutsideClick($value = true)
     {
-        $this->config['closeOnClickOutside'] = $value;
+        $this->config['allowOutsideClick'] = $value;
 
         $this->flashConfig();
 
@@ -261,12 +269,7 @@ class SweetAlertNotifier
      */
     public function persistent($buttonText = 'OK')
     {
-        $this->addButton('confirm', $buttonText);
-        $this->config['allowOutsideClick'] = false;
-        $this->removeTimer();
-        $this->flashConfig();
-
-        return $this;
+        return $this->confirmButton($buttonText);
     }
 
     /**
@@ -284,13 +287,11 @@ class SweetAlertNotifier
     /**
      * Make Message HTML view.
      *
-     * @param bool|true $html
-     *
      * @return \UxWeb\SweetAlert\SweetAlertNotifier $this
      */
     public function html()
     {
-        $this->config['content'] = $this->config['text'];
+        $this->config['html'] = $this->config['text'];
         unset($this->config['text']);
 
         $this->flashConfig();
@@ -325,6 +326,8 @@ class SweetAlertNotifier
     /**
      * Return the current alert configuration.
      *
+     * @param null|string $key
+     *
      * @return array
      */
     public function getConfig($key = null)
@@ -341,7 +344,9 @@ class SweetAlertNotifier
     /**
      * Customize alert configuration "by hand".
      *
-     * @return array
+     * @param array $config
+     *
+     * @return \UxWeb\SweetAlert\SweetAlertNotifier
      */
     public function setConfig($config = [])
     {
