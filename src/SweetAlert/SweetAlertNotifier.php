@@ -4,10 +4,10 @@ namespace UxWeb\SweetAlert;
 
 class SweetAlertNotifier
 {
-    const TYPE_WARNING = 'warning';
-    const TYPE_ERROR = 'error';
-    const TYPE_SUCCESS = 'success';
-    const TYPE_INFO = 'info';
+    const ICON_WARNING = 'warning';
+    const ICON_ERROR = 'error';
+    const ICON_SUCCESS = 'success';
+    const ICON_INFO = 'info';
     const TIMER_MILLISECONDS = 1800;
 
     /**
@@ -64,11 +64,11 @@ class SweetAlertNotifier
      *
      * @param string $text
      * @param string $title
-     * @param string $type
+     * @param string $icon
      *
      * @return \UxWeb\SweetAlert\SweetAlertNotifier $this
      */
-    public function message($text = '', $title = null, $type = null)
+    public function message($text = '', $title = null, $icon = null)
     {
         $this->config['text'] = $text;
 
@@ -77,7 +77,7 @@ class SweetAlertNotifier
         }
 
         if (!is_null($icon)) {
-            $this->config['icon'] = $icon;
+            $this->config['type'] = $icon;
         }
 
         $this->flashConfig();
@@ -110,7 +110,7 @@ class SweetAlertNotifier
      */
     public function info($text, $title = '')
     {
-        $this->message($text, $title, self::TYPE_INFO);
+        $this->message($text, $title, self::ICON_INFO);
 
         return $this;
     }
@@ -125,7 +125,7 @@ class SweetAlertNotifier
      */
     public function success($text, $title = '')
     {
-        $this->message($text, $title, self::TYPE_SUCCESS);
+        $this->message($text, $title, self::ICON_SUCCESS);
 
         return $this;
     }
@@ -140,7 +140,7 @@ class SweetAlertNotifier
      */
     public function error($text, $title = '')
     {
-        $this->message($text, $title, self::TYPE_ERROR);
+        $this->message($text, $title, self::ICON_ERROR);
 
         return $this;
     }
@@ -155,7 +155,7 @@ class SweetAlertNotifier
      */
     public function warning($text, $title = '')
     {
-        $this->message($text, $title, self::TYPE_WARNING);
+        $this->message($text, $title, self::ICON_WARNING);
 
         return $this;
     }
